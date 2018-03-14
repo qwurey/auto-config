@@ -26,8 +26,6 @@
 
   A kubenetes' job name is like: {{ project_name }}-{{ model_name }}
 
-  ​
-
   For example：boc-web-predict-ckpt-198d-8f-322
 
 
@@ -60,6 +58,7 @@
   ​
 
   Tips:
+
   1> mode: single -> single tensorflow job
 
   2> template_file_name: tf_single_template.yaml.jinja -> your template file after edited specially
