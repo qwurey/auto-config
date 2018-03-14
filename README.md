@@ -109,15 +109,20 @@ Distributed mode is similar to single except that two points:
 2.  The other is that your training code file need to be written by target distributed style of tensorflow.
 
 
+
+
 <br>
 
 <br>
 
 #### IV. Architecture
 
+```
 Kubernetes: 1.8.5
 Tensorflow: 1.4.0
 NFS
 Python: 3.x
 Jinja2
 Docker
+```
+
