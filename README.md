@@ -22,7 +22,12 @@
   vim tf_single_template_v0.yaml.jinja
   ```
 
+  ​
+
   A kubenetes' job name is like: {{ project_name }}-{{ model_name }}
+
+  ​
+
   For example：boc-web-predict-ckpt-198d-8f-322
 
 
@@ -56,8 +61,11 @@
 
   Tips:
   1> mode: single -> single tensorflow job
+
   2> template_file_name: tf_single_template.yaml.jinja -> your template file after edited specially
+
   3> project_name: boc-web-predict -> your target project name
+
   4> target_configuration_file: tf_single_job_1.yaml -> your target configuration file name
   ​
 
