@@ -22,8 +22,6 @@
   vim tf_single_template_v0.yaml.jinja
   ```
 
-  ​
-
   A kubenetes' job name is like: {{ project_name }}-{{ model_name }}
 
   For example：boc-web-predict-ckpt-198d-8f-322
@@ -66,32 +64,34 @@
   3> project_name: boc-web-predict -> your target project name
 
   4> target_configuration_file: tf_single_job_1.yaml -> your target configuration file name
-  ​
+
+
 
 4. Submit the kubernetes' configuration file.
 
-  ```shell
-  kubectl create -f {{ target_configuration_file }}
-  ```
+```shell
+kubectl create -f {{ target_configuration_file }}
+```
 
-  For example: 
+For example: 
 
-  ```shell
-  kubectl create -f tf_single_job_1.yaml
-  ```
+```shell
+kubectl create -f tf_single_job_1.yaml
+```
+
 
 
 5. If necessary, delete the target job.
 
-  ```shell
-  kubectl delete jobs {{ project_name }}-{{ model_name }} --namespace=dcdp
-  ```
+```shell
+kubectl delete jobs {{ project_name }}-{{ model_name }} --namespace=dcdp
+```
 
-  For example:
+For example:
 
-  ```shell
-  kubectl delete jobs boc-web-predict --namespace=dcdp
-  ```
+```shell
+kubectl delete jobs boc-web-predict --namespace=dcdp
+```
 
 
 
