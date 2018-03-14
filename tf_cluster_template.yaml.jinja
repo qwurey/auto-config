@@ -1,0 +1,154 @@
+{%- set image = "docker.5cu9kz.cloud.boc.com/tensorflow:1.4.0-py3" -%}
+{%- set data_dir = "/data" -%}
+{%- set log_dir = "/log" -%}
+{%- set model_dir = "/model" -%}
+{%- set src_dir = "/src" -%}
+{%- set port = 2222 -%}
+{%- set replicas = {"worker": worker_replicas, "ps": ps_replicas} -%}
+
+{%- macro worker_hosts() -%}
+  {%- for i in range(worker_replicas|int) -%}
+    {%- if not loop.first -%},{%- endif -%}
+    {{ project_name }}-worker-{{ i }}.dcdp.svc.cluster.local:{{ port }}
+  {%- endfor -%}
+{%- endmacro -%}
+
+{%- macro ps_hosts() -%}
+  {%- for i in range(ps_replicas|int) -%}
+    {%- if not loop.first -%},{%- endif -%}
+    {{ project_name }}-ps-{{ i }}.dcdp.svc.cluster.local:{{ port }}
+  {%- endfor -%}
+{%- endmacro -%}
+
+{%- for job in ["worker", "ps"] -%}
+{%- for i in range(replicas[job]|int) -%}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: {{ project_name }}
+    job: {{ job }}
+    task: "{{ i }}"
+  name: {{ project_name }}-{{ job }}-{{ i }}
+  namespace: dcdp
+spec:
+  selector:
+    name: {{ project_name }}
+    job: {{ job }}
+    task: "{{ i }}"
+  ports:
+  - port: {{ port }}
+    targetPort: 2222
+{% if job == "worker" %}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ project_name }}-{{ job }}-{{ i }}
+  namespace: dcdp
+spec:
+  template:
+    metadata:
+      labels:
+        name: {{ project_name }}
+        job: {{ job }}
+        task: "{{ i }}"
+    spec:
+      containers:
+      - name: {{ project_name }}-{{ job }}-{{ i }}
+        image: {{ image }}
+        ports:
+        - containerPort: 2222
+        command: ["/bin/sh", "-c"]
+        args: ["
+            python {{ src_dir }}/{{ project_name }}/train.py \
+                   --ps_hosts={{ ps_hosts() }} \
+                   --worker_hosts={{ worker_hosts() }} \
+                   --job_name={{ job }} \
+                   --task_index={{ i }} \
+                   --data_dir={{ data_dir }}/{{ project_name }} \
+                   --data_name=data.csv \
+                   --model_dir={{ model_dir }}/{{ project_name }}/checkpoint \
+                   --log_path={{ log_dir }}/{{ project_name }} \
+                   1>>{{ log_dir }}/{{ project_name }}/{{ project_name }}-{{ job }}-{{ i }}.log 2>>{{ log_dir }}/{{ project_name }}/{{ project_name }}-{{ job }}-{{ i }}.errlog ;"]
+        volumeMounts:
+        - name: data
+          mountPath: {{ data_dir }}
+        - name: log
+          mountPath: {{ log_dir }}
+        - name: model
+          mountPath: {{ model_dir }}
+        - name: src
+          mountPath: {{ src_dir }}
+      restartPolicy: Never
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-data
+        - name: log
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-log
+        - name: src
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-src
+        - name: model
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-model
+{% endif %}
+{% if job == "ps" %}
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ project_name }}-{{ job }}-{{ i }}
+  namespace: dcdp
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: {{ project_name }}
+        job: {{ job }}
+        task: "{{ i }}"
+    spec:
+      containers:
+      - name: {{ project_name }}-{{ job }}-{{ i }}
+        image: {{ image }}
+        ports:
+        - containerPort: 2222
+        command: ["/bin/sh", "-c"]
+        args: ["
+            python {{ src_dir }}/{{ project_name }}/train.py \
+                   --ps_hosts={{ ps_hosts() }} \
+                   --worker_hosts={{ worker_hosts() }} \
+                   --job_name={{ job }} \
+                   --log_path={{ log_dir }}/{{ project_name }} \
+                   1>>{{ log_dir }}/{{ project_name }}/{{ project_name }}-{{ job }}-{{ i }}.log 2>>{{ log_dir }}/{{ project_name }}/{{ project_name }}-{{ job }}-{{ i }}.errlog ;"]
+        volumeMounts:
+        - name: data
+          mountPath: {{ data_dir }}
+        - name: log
+          mountPath: {{ log_dir }}
+        - name: model
+          mountPath: {{ model_dir }}
+        - name: src
+          mountPath: {{ src_dir }}
+      restartPolicy: Always
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-data
+        - name: log
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-log
+        - name: src
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-src
+        - name: model
+          persistentVolumeClaim:
+            claimName: pvc-dcdp-model
+{% endif %}
+---
+{% endfor %}
+{%- endfor -%}
