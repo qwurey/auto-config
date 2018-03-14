@@ -11,7 +11,7 @@
 3. And before create, you need to choose one template file and edit this file according to your specific tensorflow job configuration.
 
 
-
+<br>
 <br>
 
 #### II. Single Tensorflow Job Usage
@@ -22,9 +22,11 @@
   vim tf_single_template_v0.yaml.jinja
   ```
 
-  A kubenetes' job name is like: {{ project_name }}-{{ model_name }}
+  A kubenetes' job name is like: `{{ project_name }}-{{ model_name }}`
 
-  For example：boc-web-predict-ckpt-198d-8f-322
+  For example：`boc-web-predict-ckpt-198d-8f-322`
+
+  <br>
 
 
 
@@ -38,7 +40,7 @@
   upload {{ train_code_file }} to /dcdp/src/{{ project_name }}
   ```
 
-  ​
+  <br>
 
 
 3. Create a kubernetes' configuration file about the target tensorflow job.
@@ -51,19 +53,15 @@
 
   ```shell
   python render_template.py single tf_single_template.yaml.jinja boc-web-predict > tf_single_job_1.yaml
-  ```
-
-  ​
 
   Tips:
-
   1> mode: single -> single tensorflow job
-
   2> template_file_name: tf_single_template.yaml.jinja -> your template file after edited specially
-
   3> project_name: boc-web-predict -> your target project name
-
   4> target_configuration_file: tf_single_job_1.yaml -> your target configuration file name
+  ```
+
+  <br>
 
 
 
@@ -79,7 +77,7 @@ For example:
 kubectl create -f tf_single_job_1.yaml
 ```
 
-
+<br>
 
 5. If necessary, delete the target job.
 
@@ -95,7 +93,9 @@ kubectl delete jobs boc-web-predict --namespace=dcdp
 
 
 
-<br>
+
+
+<br><br>
 
 #### III. Distributed Tensorflow Job Usage
 
@@ -109,6 +109,7 @@ Distributed mode is similar to single except that two points:
 2.  The other is that your training code file need to be written by target distributed style of tensorflow.
 
 
+<br>
 
 <br>
 
