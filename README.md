@@ -46,8 +46,6 @@
   python render_template.py {{ mode }} {{ template_file_name }} {{ project_name }} > {{ target_configuration_file }}
   ```
 
-  ​
-
   For example:
 
   ```shell
@@ -69,8 +67,6 @@
   kubectl create -f {{ target_configuration_file }}
   ```
 
-  ​
-
   For example: 
 
   ```shell
@@ -83,8 +79,6 @@
   ```shell
   kubectl delete jobs {{ project_name }}-{{ model_name }} --namespace=dcdp
   ```
-
-  ​
 
   For example:
 
